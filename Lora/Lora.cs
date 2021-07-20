@@ -10,6 +10,44 @@ namespace Lora
     {
 	    private SPI spi;
 
+	    private enum Register {
+		    REG_FIFO 			= (byte)0x00,
+		    REG_OP_MODE 		= (byte)0x01,
+		    REG_FRF_MSB 		= (byte)0x06,
+		    REG_FRF_MID 		= (byte)0x07,
+		    REG_FRF_LSB 		= (byte)0x08,
+		    REG_PA_CONFIG 		= (byte)0x09,
+		    REG_OCP 			= (byte)0x0b,
+		    REG_LNA 			= (byte)0x0c,
+		    REG_FIFO_ADDR_PTR 		= (byte)0x0d,
+		    REG_FIFO_TX_BASE_ADDR	= (byte)0x0e,
+		    REG_FIFO_RX_BASE_ADDR	= (byte)0x0f,
+		    REG_FIFO_RX_CURRENT_ADDR	= (byte)0x10,
+		    REG_IRQ_FLAGS		= (byte)0x12,
+		    REG_RX_NB_BYTES		= (byte)0x13,
+		    REG_PKT_SNR_VALUE		= (byte)0x19,
+		    REG_PKT_RSSI_VALUE 		= (byte)0x1a,
+		    REG_RSSI_VALUE 		= (byte)0x1b,
+		    REG_MODEM_CONFIG_1 		= (byte)0x1d,
+		    REG_MODEM_CONFIG_2 		= (byte)0x1e,
+		    REG_PREAMBLE_MSB 		= (byte)0x20,
+		    REG_PREAMBLE_LSB 		= (byte)0x21,
+		    REG_PAYLOAD_LENGTH 		= (byte)0x22,
+		    REG_MODEM_CONFIG_3 		= (byte)0x26,
+		    REG_FREQ_ERROR_MSB 		= (byte)0x28,
+		    REG_FREQ_ERROR_MID 		= (byte)0x29,
+		    REG_FREQ_ERROR_LSB 		= (byte)0x2a,
+		    REG_RSSI_WIDEBAND 		= (byte)0x2c,
+		    REG_DETECTION_OPTIMIZE 	= (byte)0x31,
+		    REG_INVERTIQ 		= (byte)0x33,
+		    REG_DETECTION_THRESHOLD 	= (byte)0x37,
+		    REG_SYNC_WORD 		= (byte)0x39,
+		    REG_INVERTIQ2 		= (byte)0x3b,
+		    REG_DIO_MAPPING_1 		= (byte)0x40,
+		    REG_VERSION 		= (byte)0x42,
+		    REG_PA_DAC 			= (byte)0x4d
+	    }
+
 	    public LoraCore(){
 		    //general initialization
 		    Core.WiringPiSetup();
@@ -25,13 +63,199 @@ namespace Lora
 		    spi = new(0, 1000000);
 
 		    //check version as per refereing lib
-		    var verByte = TxRx(new byte[]{0x42, 0x00});
+		    var verByte = ReadRegister(Register.REG_VERSION);
 
-		    if(verByte[1] != 0x12){
+		    if(verByte != 0x12){
 			    throw new Exception("Unable to initialize LoRa module!");
 		    }
 
 	    }
+
+	    public int Begin(long frequency){
+		    throw new NotImplementedException();
+	    }
+
+	    public void End(){
+		    throw new NotImplementedException();
+	    }
+
+
+	    public int BeginPacket(bool implicitHeader = false){
+		    throw new NotImplementedException();
+	    }
+
+	    public int EndPacket(bool asnc = false){
+		    throw new NotImplementedException();
+	    }
+
+
+	    public int ParsePacket(int size = 0){
+		    throw new NotImplementedException();
+	    }
+
+	    public int PacketRssi(){
+		    throw new NotImplementedException();
+	    }
+
+	    public float PacketSnr(){
+		    throw new NotImplementedException();
+	    }
+
+	    public long PacketFrequencyError(){
+		    throw new NotImplementedException();
+	    }
+
+
+	    public int Rssi(){
+		    throw new NotImplementedException();
+	    }
+
+
+	    public int Write(byte _byte){
+		    throw new NotImplementedException();
+	    }
+
+	    public int Write(byte[] buffer){
+		    throw new NotImplementedException();
+	    }
+
+
+	    public int Available(){
+		    throw new NotImplementedException();
+	    }
+
+	    public int Read(){
+		    throw new NotImplementedException();
+	    }
+
+	    public int Peak(){
+		    throw new NotImplementedException();
+	    }
+
+	    public void Flush(){
+		    throw new NotImplementedException();
+	    }
+
+
+	    public void Idle(){
+		    throw new NotImplementedException();
+	    }
+
+	    public void Sleep(){
+		    throw new NotImplementedException();
+	    }
+
+
+	    public void SetTxPower(int level){
+		    throw new NotImplementedException();
+	    }
+
+	    public void SetFrequency(long frequency){
+		    throw new NotImplementedException();
+	    }
+
+	    public void SetSpreadingFactor(int spreadingFactor){
+		    throw new NotImplementedException();
+	    }
+
+	    public void SetSignalBandWidth(int signalBandwidth){
+		    throw new NotImplementedException();
+	    }
+
+	    public void SetCodingRate4(int denominator){
+		    throw new NotImplementedException();
+	    }
+
+	    public void SetPreambleLength(long length){
+		    throw new NotImplementedException();
+	    }
+
+	    public void SetSyncWord(int syncWord){
+		     throw new NotImplementedException();
+	    }
+
+	    public void EnableCrc(){
+		     throw new NotImplementedException();
+	    }
+
+	    public void DisableCrc(){
+		     throw new NotImplementedException();
+	    }
+
+	    public void EnableInvertIQ(){
+		     throw new NotImplementedException();
+	    }
+
+	    public void DisableInvertIQ(){
+		     throw new NotImplementedException();
+	    }
+
+	    public void SetOCP(byte mA){
+		    throw new NotImplementedException();
+	    }
+
+	    public void SetGain(byte gain){
+		    throw new NotImplementedException();
+	    }
+
+	    public byte Random(){
+		    throw new NotImplementedException();
+	    }
+
+
+
+
+
+
+	    private void ExplicitHeaderMode(){
+		     throw new NotImplementedException();
+	    }
+
+	    private void ImplicitHeaderMode(){
+		     throw new NotImplementedException();
+	    }
+
+	    private void HandleDio0Rise(){
+		     throw new NotImplementedException();
+	    }
+
+	    private bool IsTransmitting(){
+		     throw new NotImplementedException();
+	    }
+
+	    
+	    private int GetSpreadingFactor(){
+		     throw new NotImplementedException();
+	    }
+
+	    private long GetSignalBandwidth(){
+		     throw new NotImplementedException();
+	    }
+
+	    
+	    private void SetLDOFlag(){
+		     throw new NotImplementedException();
+	    }
+
+
+	    private byte ReadRegister(Register reg){
+		    return SingleTransfer((byte)((byte)reg & 0x7F) /*Set the MSB to 0*/, 0x00);
+	    }
+
+	    private void WriteRegister(Register reg, byte val){
+		     SingleTransfer((byte)((byte)reg | 0x80) /*Set the MSB to 1*/, val);
+
+	    }
+
+	    private byte SingleTransfer(byte address, byte val){
+		    var ret = TxRx(new byte[]{address, val});
+		    return ret[1];
+	    }
+
+	    private static void OnDio0Rise(){
+		    throw new NotImplementedException();
+	    }
+
 
 
 	    private byte[] TxRx(byte[] data){
