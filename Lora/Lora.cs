@@ -10,6 +10,8 @@ namespace Lora
     {
 	    private SPI spi;
 
+	    private long Frequency {get; set;}
+
 	    private enum Register {
 		    REG_FIFO 			= (byte)0x00,
 		    REG_OP_MODE 		= (byte)0x01,
@@ -48,6 +50,15 @@ namespace Lora
 		    REG_PA_DAC 			= (byte)0x4d
 	    }
 
+	    private enum Mode {
+		    MODE_LONG_RANGE_MODE 	= (byte)0x80,
+		    MODE_SLEEP 			= (byte)0x00,
+		    MODE_STDBY 			= (byte)0x01,
+		    MODE_TX 			= (byte)0x03,
+		    MODE_RX_CONTINUOUS 		= (byte)0x05,
+		    MODE_RX_SINGLE 		= (byte)0x06
+	    }
+
 	    public LoraCore(){
 		    //general initialization
 		    Core.WiringPiSetup();
@@ -71,8 +82,20 @@ namespace Lora
 
 	    }
 
-	    public int Begin(long frequency){
-		    throw new NotImplementedException();
+	    public void Begin(long frequency){
+		    Sleep();
+		    SetFrequency(frequency);
+
+		    WriteRegister(Register.REG_FIFO_TX_BASE_ADDR, 0x00);
+		    WriteRegister(Register.REG_FIFO_RX_BASE_ADDR, 0x00);
+
+		    WriteRegister(Register.REG_LNA,(byte)(ReadRegister(Register.REG_LNA) | 0x03));
+
+		    WriteRegister(Register.REG_MODEM_CONFIG_3, 0x04);
+
+		    SetTxPower(17);
+
+		    Idle();
 	    }
 
 	    public void End(){
@@ -138,20 +161,36 @@ namespace Lora
 
 
 	    public void Idle(){
-		    throw new NotImplementedException();
+		    WriteRegister(Register.REG_OP_MODE, (byte)Mode.MODE_LONG_RANGE_MODE | (byte)Mode.MODE_STDBY);
 	    }
 
 	    public void Sleep(){
-		    throw new NotImplementedException();
+		    WriteRegister(Register.REG_OP_MODE, (byte)Mode.MODE_LONG_RANGE_MODE | (byte)Mode.MODE_SLEEP);
 	    }
 
 
 	    public void SetTxPower(int level){
-		    throw new NotImplementedException();
+		    if(level > 17){
+			    level = level > 20 ? 20 : level;
+
+			    level -= 3;
+			    WriteRegister(Register.REG_PA_DAC, 0x87);
+			    SetOCP(140);
+		    }else{
+			    level = level < 2 ? 2 : level;
+			    WriteRegister(Register.REG_PA_DAC, 0x84);
+			    SetOCP(100);
+		    }
+
+		    WriteRegister(Register.REG_PA_CONFIG, (byte)(0x80 | (level - 2)));
 	    }
 
 	    public void SetFrequency(long frequency){
-		    throw new NotImplementedException();
+		    Frequency = frequency;
+		    ulong frf = ((ulong)frequency << 19) / 32000000;
+		    WriteRegister(Register.REG_FRF_MSB, (byte)(frf >> 16));
+		    WriteRegister(Register.REG_FRF_MID, (byte)(frf >> 8));
+		    WriteRegister(Register.REG_FRF_LSB, (byte)(frf >> 0));
 	    }
 
 	    public void SetSpreadingFactor(int spreadingFactor){
@@ -191,7 +230,14 @@ namespace Lora
 	    }
 
 	    public void SetOCP(byte mA){
-		    throw new NotImplementedException();
+		    byte ocpTrim = 27;
+
+		    if(mA <= 120){
+			    ocpTrim = (byte)((mA - 45) / 5);
+		    } else if(mA <= 240){
+			    ocpTrim = (byte)((mA + 30) / 10);
+		    }
+		    WriteRegister(Register.REG_OCP, (byte)(0x20 | (0x1F & ocpTrim)));
 	    }
 
 	    public void SetGain(byte gain){

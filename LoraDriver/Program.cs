@@ -9,7 +9,9 @@ namespace LoraDriver
         {
             Console.WriteLine("Hello World!");
 	    var l = new LoraCore();
-	    l.Begin(23000);
+	    l.Begin((long)433E6);
+
+	    //Console.WriteLine(frq);
         }
     }
 }
