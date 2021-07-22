@@ -11,6 +11,13 @@ namespace Lora
 	    private SPI spi;
 
 	    private long Frequency {get; set;}
+	    private int PacketIndex {get; set;}
+	    private bool ImplicitHeader {get; set;}
+
+	    private static readonly byte IRQ_TX_DONE_MASK 		= 0x08;
+	    private static readonly byte IRQ_PAYLOAD_CRC_ERROR_MASK 	= 0x20;
+	    private static readonly byte IRQ_RX_DONE_MASK 		= 0x40;
+
 
 	    private enum Register {
 		    REG_FIFO 			= (byte)0x00,
@@ -113,7 +120,35 @@ namespace Lora
 
 
 	    public int ParsePacket(int size = 0){
-		    throw new NotImplementedException();
+		    var packetLength = 0;
+		    var irqFlags = (byte)ReadRegister(Register.REG_IRQ_FLAGS);
+
+		    if (size > 0){
+			    ImplicitHeaderMode();
+			    WriteRegister(Register.REG_PAYLOAD_LENGTH, (byte)size);
+		    } else {
+			    ExplicitHeaderMode();
+		    }
+		    WriteRegister(Register.REG_IRQ_FLAGS, irqFlags);
+
+		    if ((irqFlags & IRQ_RX_DONE_MASK) == IRQ_RX_DONE_MASK && (irqFlags & IRQ_PAYLOAD_CRC_ERROR_MASK) == 0) {
+			    PacketIndex = 0;
+
+			    if(ImplicitHeader){
+				    packetLength = ReadRegister(Register.REG_PAYLOAD_LENGTH);
+			    }else{
+				    packetLength = ReadRegister(Register.REG_RX_NB_BYTES);
+			    }
+			    WriteRegister(Register.REG_FIFO_ADDR_PTR, ReadRegister(Register.REG_FIFO_RX_CURRENT_ADDR));
+			    Idle();
+		    } else if (ReadRegister(Register.REG_OP_MODE) != (byte)((byte)Mode.MODE_LONG_RANGE_MODE | (byte)Mode.MODE_RX_SINGLE)) {
+			    WriteRegister(Register.REG_FIFO_ADDR_PTR, 0);
+
+			    WriteRegister(Register.REG_OP_MODE, (byte)((byte)Mode.MODE_LONG_RANGE_MODE | (byte)Mode.MODE_RX_SINGLE));
+		    }
+
+
+		    return 0x00;
 	    }
 
 	    public int PacketRssi(){
@@ -323,15 +358,19 @@ namespace Lora
 			    sb.Append(" ");
 		    }
 		    var str = sb.ToString().Trim();
-		    foreach(var c in str){
-			    Console.Write("*");
+		    if(!rx){
+		    	foreach(var c in str){
+			    	Console.Write("*");
+		    	}
+		    	Console.WriteLine();
 		    }
-		    Console.WriteLine();
 		    Console.WriteLine(str);
-		    foreach(var c in str){
-			    Console.Write("*");
+		    if(rx){
+		    	foreach(var c in str){
+			    	Console.Write("*");
+		    	}
+		    	Console.WriteLine();
 		    }
-		    Console.WriteLine();
 
 	    }
     }
