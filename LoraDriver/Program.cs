@@ -14,7 +14,13 @@ namespace LoraDriver
 
 	    for(;;){
 		    var packetSize = l.ParsePacket();
-		    Thread.Sleep(20);
+		    if(packetSize > 0){
+			    //Console.WriteLine(packetSize);
+			    while(l.Available()){
+				    Console.Write((char)l.Read());
+			    }
+		    }
+		    Thread.Sleep(1);
 	    }
 
 

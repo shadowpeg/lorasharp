@@ -148,7 +148,7 @@ namespace Lora
 		    }
 
 
-		    return 0x00;
+		    return packetLength;
 	    }
 
 	    public int PacketRssi(){
@@ -178,12 +178,17 @@ namespace Lora
 	    }
 
 
-	    public int Available(){
-		    throw new NotImplementedException();
+	    public bool Available(){
+		    return (ReadRegister(Register.REG_RX_NB_BYTES) - PacketIndex) > 0;
 	    }
 
-	    public int Read(){
-		    throw new NotImplementedException();
+	    public byte Read(){
+		    if(!Available()){
+			    return (byte)0xFF;
+		    }
+		    PacketIndex++;
+
+		    return ReadRegister(Register.REG_FIFO);
 	    }
 
 	    public int Peak(){
@@ -289,7 +294,8 @@ namespace Lora
 
 
 	    private void ExplicitHeaderMode(){
-		     throw new NotImplementedException();
+		     ImplicitHeader = false;
+		     WriteRegister(Register.REG_MODEM_CONFIG_1,(byte)(ReadRegister(Register.REG_MODEM_CONFIG_1) & 0xfe));
 	    }
 
 	    private void ImplicitHeaderMode(){
@@ -340,9 +346,9 @@ namespace Lora
 
 
 	    private byte[] TxRx(byte[] data){
-		    HexDump(data);
+		    //HexDump(data);
 		    data = spi.SPIRxTx(data);
-		    HexDump(data, true);
+		    //HexDump(data, true);
 		    return data;
 	    }
 
