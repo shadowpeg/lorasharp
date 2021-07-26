@@ -23,6 +23,10 @@ namespace LoraDriver
 			    }
 			    sbx.AppendLine($"RSSI : {l.PacketRssi()}");
 			    Console.WriteLine(sbx);
+			    Console.WriteLine("Sending Back >> ");
+			    l.BeginPacket();
+			    l.WriteString(sbx.ToString());
+			    l.EndPacket();
 
 		    }
 		    Thread.Sleep(1);

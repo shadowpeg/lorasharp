@@ -13,6 +13,11 @@ namespace Lora
 	    private long Frequency {get; set;}
 	    private int PacketIndex {get; set;}
 	    private bool ImplicitHeader {get; set;}
+	    private bool Transmitting {
+		    get {
+			    throw new NotImplementedException();
+		    }
+	    }
 
 	    private static readonly byte IRQ_TX_DONE_MASK 		= 0x08;
 	    private static readonly byte IRQ_PAYLOAD_CRC_ERROR_MASK 	= 0x20;
@@ -114,8 +119,23 @@ namespace Lora
 	    }
 
 
-	    public int BeginPacket(bool implicitHeader = false){
-		    throw new NotImplementedException();
+	    public bool BeginPacket(bool implicitHeader = false){
+		    if(Transmitting){
+			    return false;
+		    }
+
+		    Idle();
+
+		    if(implicitHeader){
+			    ImplicitHeaderMode();
+		    }else{
+			    ExplicitHeaderMode();
+		    }
+
+		    WriteRegister(Register.REG_FIFO_ADDR_PTR, 0);
+		    WriteRegister(Register.REG_PAYLOAD_LENGTH, 0);
+
+		    return true;
 	    }
 
 	    public int EndPacket(bool asnc = false){
@@ -170,6 +190,10 @@ namespace Lora
 
 	    public int Rssi(){
 		    return (ReadRegister(Register.REG_RSSI_VALUE) - ((ulong)Frequency < (ulong)RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
+	    }
+
+	    public void WriteString(string str){
+
 	    }
 
 
