@@ -15,7 +15,14 @@ namespace Lora
 	    private bool ImplicitHeader {get; set;}
 	    private bool Transmitting {
 		    get {
-			    throw new NotImplementedException();
+			    if((ReadRegister(Register.REG_OP_MODE) & (byte)Mode.MODE_TX) == (byte)Mode.MODE_TX){
+				    return true;
+			    }
+
+			    if((ReadRegister(Register.REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) != 0){
+				    WriteRegister(Register.REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
+			    }
+			    return false;
 		    }
 	    }
 
@@ -193,7 +200,7 @@ namespace Lora
 	    }
 
 	    public void WriteString(string str){
-
+		    throw new NotImplementedException();
 	    }
 
 
