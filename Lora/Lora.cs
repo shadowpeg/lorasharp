@@ -18,6 +18,10 @@ namespace Lora
 	    private static readonly byte IRQ_PAYLOAD_CRC_ERROR_MASK 	= 0x20;
 	    private static readonly byte IRQ_RX_DONE_MASK 		= 0x40;
 
+	    private static readonly ulong RF_MID_BAND_THRESHOLD 	= (ulong)525E6;
+	    private static readonly byte RSSI_OFFSET_HF_PORT 		= 157;
+	    private static readonly byte RSSI_OFFSET_LF_PORT 		= 164;
+
 
 	    private enum Register {
 		    REG_FIFO 			= (byte)0x00,
@@ -152,7 +156,7 @@ namespace Lora
 	    }
 
 	    public int PacketRssi(){
-		    throw new NotImplementedException();
+		    return (ReadRegister(Register.REG_PKT_RSSI_VALUE) - ((ulong)Frequency < (ulong)RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 	    }
 
 	    public float PacketSnr(){
@@ -165,7 +169,7 @@ namespace Lora
 
 
 	    public int Rssi(){
-		    throw new NotImplementedException();
+		    return (ReadRegister(Register.REG_RSSI_VALUE) - ((ulong)Frequency < (ulong)RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 	    }
 
 
