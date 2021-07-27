@@ -9,7 +9,7 @@ namespace LoraDriver
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Waiting...");
 	    var l = new LoraCore();
 	    l.Begin((long)433E6);
 	    var sbx = new StringBuilder();
@@ -21,12 +21,15 @@ namespace LoraDriver
 			    while(l.Available()){
 				    sbx.Append((char)l.Read());
 			    }
+			    var received = sbx.ToString();
 			    sbx.AppendLine($"RSSI : {l.PacketRssi()}");
 			    Console.WriteLine(sbx);
 			    Console.WriteLine("Sending Back >> ");
 			    l.BeginPacket();
-			    l.WriteString(sbx.ToString());
+			    var written = l.WriteString(received);
+			    Console.WriteLine($"Written {written} bytes");
 			    l.EndPacket();
+			    Console.WriteLine();
 
 		    }
 		    Thread.Sleep(1);

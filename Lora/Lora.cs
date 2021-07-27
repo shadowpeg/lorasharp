@@ -34,6 +34,8 @@ namespace Lora
 	    private static readonly byte RSSI_OFFSET_HF_PORT 		= 157;
 	    private static readonly byte RSSI_OFFSET_LF_PORT 		= 164;
 
+	    private static readonly byte MAX_PKT_LENGTH			= 255;
+
 
 	    private enum Register {
 		    REG_FIFO 			= (byte)0x00,
@@ -145,8 +147,17 @@ namespace Lora
 		    return true;
 	    }
 
-	    public int EndPacket(bool asnc = false){
-		    throw new NotImplementedException();
+	    public void EndPacket(bool asnc = false){
+		    /*if(asnc & OnTxDone){
+			    WriteTegister(Register.REG_DIO_MAPPING_1, 0x40);
+		    }*/ //TODO: Finish this async mode
+
+		    WriteRegister(Register.REG_OP_MODE, (byte)Mode.MODE_LONG_RANGE_MODE | (byte)Mode.MODE_TX);
+
+		    if(!asnc){
+			    while((ReadRegister(Register.REG_IRQ_FLAGS) & IRQ_TX_DONE_MASK) == 0);
+		    }
+		    WriteRegister(Register.REG_IRQ_FLAGS, IRQ_TX_DONE_MASK);
 	    }
 
 
@@ -199,17 +210,21 @@ namespace Lora
 		    return (ReadRegister(Register.REG_RSSI_VALUE) - ((ulong)Frequency < (ulong)RF_MID_BAND_THRESHOLD ? RSSI_OFFSET_LF_PORT : RSSI_OFFSET_HF_PORT));
 	    }
 
-	    public void WriteString(string str){
-		    throw new NotImplementedException();
-	    }
+	    public int WriteString(string str){
+		    var currentLength = ReadRegister(Register.REG_PAYLOAD_LENGTH);
+		    var strBytes = Encoding.ASCII.GetBytes(str);
+		    var byteSize = strBytes.Length;
+		    if((currentLength + byteSize) > MAX_PKT_LENGTH){
+			    byteSize = MAX_PKT_LENGTH - currentLength;
+		    }
 
+		    for(int i = 0; i < byteSize; i++){
+			    WriteRegister(Register.REG_FIFO, strBytes[i]);
+		    }
 
-	    public int Write(byte _byte){
-		    throw new NotImplementedException();
-	    }
+		    WriteRegister(Register.REG_PAYLOAD_LENGTH, (byte)(currentLength + byteSize));
 
-	    public int Write(byte[] buffer){
-		    throw new NotImplementedException();
+		    return byteSize;
 	    }
 
 
