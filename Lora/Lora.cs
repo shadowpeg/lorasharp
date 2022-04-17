@@ -118,7 +118,7 @@ namespace Lora
 
 		    WriteRegister(Register.REG_MODEM_CONFIG_3, 0x04);
 
-		    SetTxPower(17);
+		    SetTxPower(20);
 
 		    Idle();
 	    }
